@@ -1,3 +1,5 @@
+# docker stack deploy -c ./timescale-stack.yml homeward_timescale
+version: "3.4"
 services:
   kong_db:
     image: "postgres:9.6"
