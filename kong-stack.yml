@@ -1,0 +1,51 @@
+# docker stack deploy -c ./timescale-stack.yml homeward_timescale
+version: "3.4"
+
+services:
+  kong_db:
+    image: "postgres:9.6"
+    restart: always
+    ports:
+      - 5432:5432 
+    volumes:
+      - "./kong_data:/var/lib/postgresql/data:rw"
+    env_file: ./kong.
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2100M
+          
+  kong_api:
+    image: "kong:3.1.1-ubuntu"
+    restart: always
+    depends_on:
+      - kong_db
+    ports:
+      - 8000:8000 # api
+      - 8443:8443 # api ssl
+      - 8001:8001 # admin
+      - 8444:8444 # admin ssl
+    env_file: ./kong.env
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2100M
+          
+  konga:
+    image: pantsel/konga:latest
+    restart: always
+    depends_on:
+      - kong_api
+    ports:
+      - 1337:1337 #admin
+    env_file: ./kong.env
+      
+      
