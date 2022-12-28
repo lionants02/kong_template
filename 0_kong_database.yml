@@ -1,0 +1,20 @@
+services:
+  kong_db:
+    image: "postgres:9.6"
+    restart: always
+    ports:
+      - 5432:5432 
+    volumes:
+      - "./kong_data:/var/lib/postgresql/data:rw"
+    env_file: ./kong.
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 2100M
